@@ -1,0 +1,6 @@
+{
+  "name": "Youth Tube",
+  "description": "Youth Tube - Watch, Create & Share live video and broadcasts in Kannada, English, and Hindi. Your Video, Our World!",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
