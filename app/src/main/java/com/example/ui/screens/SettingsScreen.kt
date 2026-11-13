@@ -1,5 +1,7 @@
 package com.example.ui.screens
 
+import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
@@ -26,6 +28,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.ui.components.GitHubLogoIcon
+import com.example.ui.components.copyToClipboard
+import com.example.ui.components.shareGeneral
+import com.example.ui.components.shareToGitHub
 import com.example.viewmodel.UserProfile
 
 /**
@@ -57,6 +63,7 @@ fun SettingsScreen(
   var notifyRecommended by remember { mutableStateOf(true) }
   var notifyLiveStreams by remember { mutableStateOf(true) }
   var isVipAdFreeActive by remember { mutableStateOf(false) }
+  var githubRepoUrl by remember { mutableStateOf("https://github.com/sharanukrishnapur/youth-tube") }
 
   BackHandler { onBackClick() }
 
@@ -604,7 +611,165 @@ fun SettingsScreen(
       }
 
       // -------------------------------------------------------------
-      // 8. APP ABOUT & ATTRIBUTION
+      // 8. GITHUB SHARE & CODESPACES AAB/APK EXPORT
+      // -------------------------------------------------------------
+      item {
+        SettingsSectionHeader(title = "GitHub Share & Code · ಗಿಟ್‌ಹಬ್ ಹಂಚಿಕೆ", kannada = "ರೆಪೊಸಿಟರಿ ಮತ್ತು AAB")
+        Surface(
+          color = Color(0xFF0D1117),
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 14.dp)
+            .testTag("settings_github_share_card"),
+          shape = RoundedCornerShape(16.dp),
+          border = BorderStroke(1.dp, Color(0xFF30363D)),
+          shadowElevation = 2.dp
+        ) {
+          Column(modifier = Modifier.padding(14.dp)) {
+            Row(
+              verticalAlignment = Alignment.CenterVertically,
+              modifier = Modifier.fillMaxWidth()
+            ) {
+              GitHubLogoIcon(modifier = Modifier.size(40.dp))
+              Spacer(modifier = Modifier.width(12.dp))
+              Column(modifier = Modifier.weight(1f)) {
+                Text(
+                  text = "GitHub Share & Project Sync",
+                  fontWeight = FontWeight.Bold,
+                  fontSize = 14.sp,
+                  color = Color.White
+                )
+                Text(
+                  text = "Share repo link, Gist snippets & Play Console AAB commands",
+                  fontSize = 11.sp,
+                  color = Color(0xFF8B949E)
+                )
+              }
+              Surface(
+                color = Color(0xFF238636),
+                shape = RoundedCornerShape(6.dp)
+              ) {
+                Text(
+                  text = "GIT READY",
+                  color = Color.White,
+                  fontSize = 9.sp,
+                  fontWeight = FontWeight.Black,
+                  modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                )
+              }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            OutlinedTextField(
+              value = githubRepoUrl,
+              onValueChange = { githubRepoUrl = it },
+              label = { Text("GitHub Repository URL", fontSize = 11.sp, color = Color(0xFF8B949E)) },
+              singleLine = true,
+              shape = RoundedCornerShape(10.dp),
+              colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color(0xFFC9D1D9),
+                focusedBorderColor = Color(0xFF58A6FF),
+                unfocusedBorderColor = Color(0xFF30363D),
+                focusedContainerColor = Color(0xFF161B22),
+                unfocusedContainerColor = Color(0xFF161B22)
+              ),
+              modifier = Modifier
+                .fillMaxWidth()
+                .testTag("input_github_repo_url")
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+              Button(
+                onClick = {
+                  shareToGitHub(
+                    context = context,
+                    title = "Youth Tube Android App",
+                    url = githubRepoUrl,
+                    text = "Check out Youth Tube (News Live, Music, Comedy, Kitchen, Business & 14 Indian Languages)!"
+                  )
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF238636)),
+                shape = RoundedCornerShape(10.dp),
+                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp),
+                modifier = Modifier
+                  .weight(1f)
+                  .testTag("btn_settings_share_github")
+              ) {
+                Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.width(6.dp))
+                Text("Share to GitHub", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+              }
+
+              OutlinedButton(
+                onClick = {
+                  val commands = "git add . && git commit -m \"Youth Tube update\" && git push -u origin main\n# Build Play Console AAB & APK in Codespace:\ngradle :app:bundleRelease :app:assembleDebug"
+                  copyToClipboard(context, commands)
+                },
+                border = BorderStroke(1.dp, Color(0xFF58A6FF)),
+                shape = RoundedCornerShape(10.dp),
+                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp),
+                modifier = Modifier
+                  .weight(1f)
+                  .testTag("btn_copy_github_commands")
+              ) {
+                Icon(Icons.Default.ContentCopy, contentDescription = null, tint = Color(0xFF58A6FF), modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.width(6.dp))
+                Text("Copy Build Cmds", color = Color(0xFF58A6FF), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+              }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+              OutlinedButton(
+                onClick = {
+                  shareGeneral(
+                    context = context,
+                    title = "Youth Tube GitHub Repository",
+                    text = "🚀 Youth Tube Source Code & Releases:\n$githubRepoUrl"
+                  )
+                },
+                border = BorderStroke(1.dp, Color(0xFF30363D)),
+                shape = RoundedCornerShape(10.dp),
+                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+                modifier = Modifier.weight(1f)
+              ) {
+                Text("Share Repo Link", color = Color(0xFFC9D1D9), fontSize = 11.sp)
+              }
+
+              OutlinedButton(
+                onClick = {
+                  try {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(githubRepoUrl))
+                    context.startActivity(intent)
+                  } catch (_: Exception) {
+                    Toast.makeText(context, "Invalid GitHub URL", Toast.LENGTH_SHORT).show()
+                  }
+                },
+                border = BorderStroke(1.dp, Color(0xFF30363D)),
+                shape = RoundedCornerShape(10.dp),
+                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+                modifier = Modifier.weight(1f)
+              ) {
+                Text("Open GitHub ➔", color = Color(0xFFC9D1D9), fontSize = 11.sp)
+              }
+            }
+          }
+        }
+      }
+
+      // -------------------------------------------------------------
+      // 9. APP ABOUT & ATTRIBUTION
       // -------------------------------------------------------------
       item {
         SettingsSectionHeader(title = "About · ಅಪ್ಲಿಕೇಶನ್ ಮಾಹಿತಿ", kannada = "ಆವೃತ್ತಿ ಮತ್ತು ವಿವರ")

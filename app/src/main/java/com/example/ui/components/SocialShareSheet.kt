@@ -123,7 +123,7 @@ fun SocialShareSheet(
 
       Spacer(modifier = Modifier.height(18.dp))
 
-      // Primary Social Targets: WhatsApp, Facebook, Instagram
+      // Primary Social Targets: WhatsApp, Facebook, Instagram, GitHub
       Text(
         text = "DIRECT SHARE",
         color = Color(0xFF888888),
@@ -136,46 +136,63 @@ fun SocialShareSheet(
 
       Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceAround,
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.Top
       ) {
         // 1. WhatsApp Button
         SocialShareIconItem(
           label = "WhatsApp",
-          subtitle = "Chats & Status",
+          subtitle = "Chats",
           testTag = "share_whatsapp_btn",
+          modifier = Modifier.weight(1f),
           onClick = {
             shareToWhatsApp(context, shareMessage)
             onDismiss()
           }
         ) {
-          WhatsAppLogoIcon(modifier = Modifier.size(54.dp))
+          WhatsAppLogoIcon(modifier = Modifier.size(48.dp))
         }
 
         // 2. Facebook Button
         SocialShareIconItem(
           label = "Facebook",
-          subtitle = "Feed & Stories",
+          subtitle = "Feed",
           testTag = "share_facebook_btn",
+          modifier = Modifier.weight(1f),
           onClick = {
             shareToFacebook(context, videoUrl, shareMessage)
             onDismiss()
           }
         ) {
-          FacebookLogoIcon(modifier = Modifier.size(54.dp))
+          FacebookLogoIcon(modifier = Modifier.size(48.dp))
         }
 
         // 3. Instagram Button
         SocialShareIconItem(
           label = "Instagram",
-          subtitle = "Stories & Direct",
+          subtitle = "Stories",
           testTag = "share_instagram_btn",
+          modifier = Modifier.weight(1f),
           onClick = {
             shareToInstagram(context, shareMessage)
             onDismiss()
           }
         ) {
-          InstagramLogoIcon(modifier = Modifier.size(54.dp))
+          InstagramLogoIcon(modifier = Modifier.size(48.dp))
+        }
+
+        // 4. GitHub Button
+        SocialShareIconItem(
+          label = "GitHub",
+          subtitle = "Gist / Repo",
+          testTag = "share_github_btn",
+          modifier = Modifier.weight(1f),
+          onClick = {
+            shareToGitHub(context, videoTitle, videoUrl, shareMessage)
+            onDismiss()
+          }
+        ) {
+          GitHubLogoIcon(modifier = Modifier.size(48.dp))
         }
       }
 
@@ -281,16 +298,16 @@ fun SocialShareIconItem(
   label: String,
   subtitle: String,
   testTag: String,
+  modifier: Modifier = Modifier,
   onClick: () -> Unit,
   iconContent: @Composable () -> Unit
 ) {
   Column(
     horizontalAlignment = Alignment.CenterHorizontally,
-    modifier = Modifier
-      .width(96.dp)
+    modifier = modifier
       .clip(RoundedCornerShape(12.dp))
       .clickable { onClick() }
-      .padding(vertical = 8.dp)
+      .padding(vertical = 8.dp, horizontal = 2.dp)
       .testTag(testTag)
   ) {
     iconContent()
@@ -470,8 +487,67 @@ fun InstagramLogoIcon(modifier: Modifier = Modifier) {
   }
 }
 
+// 4. GitHub Logo (Dark Circle + White Code-Branch / Octo Crest)
+@Composable
+fun GitHubLogoIcon(modifier: Modifier = Modifier) {
+  Canvas(modifier = modifier) {
+    val radius = size.minDimension / 2f
+    val center = Offset(size.width / 2f, size.height / 2f)
+
+    // GitHub Dark Background Circle with subtle border
+    drawCircle(
+      color = Color(0xFF24292E),
+      radius = radius,
+      center = center
+    )
+    drawCircle(
+      color = Color.White.copy(alpha = 0.22f),
+      radius = radius - 1.dp.toPx(),
+      center = center,
+      style = Stroke(width = 1.5.dp.toPx())
+    )
+
+    // Stylized White Git Cat / Code Fork Emblem inside circle
+    val strokeW = radius * 0.14f
+    val topLeft = Offset(center.x - radius * 0.26f, center.y - radius * 0.24f)
+    val bottomLeft = Offset(center.x - radius * 0.26f, center.y + radius * 0.3f)
+    val topRight = Offset(center.x + radius * 0.26f, center.y - radius * 0.14f)
+
+    // Vertical main branch line
+    drawLine(
+      color = Color.White,
+      start = topLeft,
+      end = bottomLeft,
+      strokeWidth = strokeW
+    )
+
+    // Curved merge branch to right node
+    val branchPath = Path().apply {
+      moveTo(bottomLeft.x, bottomLeft.y - radius * 0.1f)
+      quadraticTo(
+        center.x + radius * 0.24f,
+        center.y + radius * 0.12f,
+        topRight.x,
+        topRight.y
+      )
+    }
+    drawPath(path = branchPath, color = Color.White, style = Stroke(width = strokeW))
+
+    // Three Git commit nodes
+    drawCircle(color = Color.White, radius = radius * 0.15f, center = topLeft)
+    drawCircle(color = Color.White, radius = radius * 0.15f, center = bottomLeft)
+    drawCircle(color = Color(0xFF2EA44F), radius = radius * 0.15f, center = topRight)
+    drawCircle(
+      color = Color.White,
+      radius = radius * 0.15f,
+      center = topRight,
+      style = Stroke(width = strokeW * 0.55f)
+    )
+  }
+}
+
 // -------------------------------------------------------------
-// INTENT HELPERS FOR WHATSAPP, FACEBOOK, INSTAGRAM
+// INTENT HELPERS FOR WHATSAPP, FACEBOOK, INSTAGRAM, GITHUB
 // -------------------------------------------------------------
 
 fun shareToWhatsApp(context: Context, text: String) {
@@ -549,6 +625,39 @@ fun shareToInstagram(context: Context, text: String) {
       "Share to Instagram"
     )
     context.startActivity(chooser)
+  }
+}
+
+fun shareToGitHub(context: Context, title: String, url: String, text: String) {
+  val markdownShare = "### [$title]($url)\n\n$text\n\nShared from **Youth Tube** Android App (`#YouthTube`)"
+  val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+  clipboard.setPrimaryClip(ClipData.newPlainText("GitHub Markdown Share", markdownShare))
+
+  val githubAppIntent = Intent(Intent.ACTION_SEND).apply {
+    type = "text/plain"
+    putExtra(Intent.EXTRA_SUBJECT, title)
+    putExtra(Intent.EXTRA_TEXT, markdownShare)
+    setPackage("com.github.android")
+  }
+  try {
+    context.startActivity(githubAppIntent)
+    Toast.makeText(context, "Markdown copied & opening GitHub!", Toast.LENGTH_SHORT).show()
+  } catch (_: Exception) {
+    try {
+      val gistIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://gist.github.com/"))
+      context.startActivity(gistIntent)
+      Toast.makeText(context, "GitHub Markdown copied to clipboard! Paste into your Gist/Issue.", Toast.LENGTH_LONG).show()
+    } catch (_: Exception) {
+      val chooser = Intent.createChooser(
+        Intent(Intent.ACTION_SEND).apply {
+          type = "text/plain"
+          putExtra(Intent.EXTRA_SUBJECT, title)
+          putExtra(Intent.EXTRA_TEXT, markdownShare)
+        },
+        "Share to GitHub"
+      )
+      context.startActivity(chooser)
+    }
   }
 }
 
