@@ -130,4 +130,52 @@ class ExampleUnitTest {
     assertEquals("ca-app-pub-3940256099942544/6300978111", com.example.model.AdMobBannerConfig.TEST_BANNER_ID)
     assertEquals("ca-app-pub-3940256099942544/5224354917", com.example.model.AdMobBannerConfig.TEST_REWARDED_ID)
   }
+
+  @Test
+  fun testIndiaAllLanguagesYardRepository() {
+    val languages = com.example.model.IndianLanguagesRepository.allLanguages
+    assertEquals(14, languages.size)
+
+    // Test Kannada
+    val kannada = com.example.model.IndianLanguagesRepository.findByName("ಕನ್ನಡ")
+    assertNotNull(kannada)
+    assertEquals("kn", kannada?.code)
+    assertEquals("Kannada", kannada?.englishName)
+    assertEquals("ನಮಸ್ಕಾರ!", kannada?.greeting)
+    assertEquals("Karnataka", kannada?.region)
+
+    // Test Hindi
+    val hindi = com.example.model.IndianLanguagesRepository.findByName("हिन्दी")
+    assertNotNull(hindi)
+    assertEquals("hi", hindi?.code)
+    assertEquals("Hindi", hindi?.englishName)
+    assertEquals("नमस्ते!", hindi?.greeting)
+
+    // Test Telugu
+    val telugu = com.example.model.IndianLanguagesRepository.findByName("Telugu")
+    assertNotNull(telugu)
+    assertEquals("te", telugu?.code)
+    assertEquals("తెలుగు", telugu?.nativeName)
+    assertEquals("నమస్కారం!", telugu?.greeting)
+
+    // Test Tamil
+    val tamil = com.example.model.IndianLanguagesRepository.findByName("Tamil")
+    assertNotNull(tamil)
+    assertEquals("ta", tamil?.code)
+    assertEquals("தமிழ்", tamil?.nativeName)
+    assertEquals("வணக்கம்!", tamil?.greeting)
+
+    // Verify all 14 expected language codes
+    val expectedCodes = listOf("kn", "hi", "en", "te", "ta", "ml", "mr", "bn", "gu", "pa", "or", "as", "ur", "sa")
+    assertEquals(expectedCodes, languages.map { it.code })
+  }
+
+  @Test
+  fun testLiveVideoChannelsCategories() {
+    val liveVm = com.example.viewmodel.LiveVideoViewModel()
+    val channels = liveVm.channels
+    assertTrue(channels.any { it.category == "News Live" })
+    assertTrue(channels.any { it.category.contains("Music") && it.category.contains("Comedy") })
+    assertTrue(channels.any { it.category == "Business" })
+  }
 }

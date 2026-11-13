@@ -2,11 +2,14 @@ package com.example.ui.screens
 
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import com.example.model.IndianLanguage
+import com.example.model.IndianLanguagesRepository
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -24,10 +27,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.BusinessCenter
 import androidx.compose.material.icons.filled.ChildCare
 import androidx.compose.material.icons.filled.Flight
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.LiveTv
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.MoreHoriz
@@ -40,6 +47,8 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SelfImprovement
+import androidx.compose.material.icons.filled.SentimentVerySatisfied
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.filled.VolunteerActivism
@@ -117,36 +126,43 @@ fun HomeScreen(
   onOpenAdmin: () -> Unit = {},
   onOpenVideoPlayer: () -> Unit = {},
   onPlayVideo: (TrendingVideo) -> Unit = { onOpenVideoPlayer() },
+  onOpenSettings: () -> Unit = {},
   adminViewModel: AdminViewModel = viewModel(),
   authViewModel: AuthViewModel = viewModel(),
   modifier: Modifier = Modifier
 ) {
   val context = LocalContext.current
   var selectedLanguage by remember { mutableStateOf("ಕನ್ನಡ") }
-  var selectedCategory by remember { mutableStateOf("Home") }
+  var filterByLanguageStrictly by remember { mutableStateOf(false) }
+  var selectedCategory by remember { mutableStateOf("all") }
   var selectedFilterCategory by remember { mutableStateOf("All · ಎಲ್ಲಾ") }
   var activeVideoToPlay by remember { mutableStateOf<TrendingVideo?>(null) }
   var videoToShare by remember { mutableStateOf<TrendingVideo?>(null) }
   var showSearchModal by remember { mutableStateOf(false) }
   var showLoginDialog by remember { mutableStateOf(false) }
   var showRewardedAdDialog by remember { mutableStateOf(false) }
+  var showIndiaLanguagesYard by remember { mutableStateOf(false) }
 
   val publishedVideos by adminViewModel.publishedVideos.collectAsState()
 
   val categories = remember {
     listOf(
-      CategoryItem("home", "Home", Color(0xFFE53935), Icons.Default.Home),
-      CategoryItem("videos", "Videos", Color(0xFF1E88E5), Icons.Default.Movie),
+      CategoryItem("all", "All\nಎಲ್ಲಾ", Color(0xFFE53935), Icons.Default.Apps),
+      CategoryItem("news_live", "News Live", Color(0xFFD50000), Icons.Default.LiveTv),
+      CategoryItem("music", "Music", Color(0xFFD81B60), Icons.Default.MusicNote),
+      CategoryItem("comedy", "Comedy", Color(0xFFFF6D00), Icons.Default.SentimentVerySatisfied),
+      CategoryItem("kitchen", "Kitchen", Color(0xFF5E35B1), Icons.Default.Restaurant),
+      CategoryItem("business", "Business", Color(0xFF00695C), Icons.Default.BusinessCenter),
       CategoryItem("shorts", "Shorts", Color(0xFF8E24AA), Icons.Outlined.FlashOn),
       CategoryItem("kids", "Kids Zone", Color(0xFF43A047), Icons.Default.ChildCare),
       CategoryItem("education", "Education", Color(0xFFFB8C00), Icons.Default.MenuBook),
       CategoryItem("devotional", "Devotional", Color(0xFF00ACC1), Icons.Default.VolunteerActivism),
-      CategoryItem("music", "Music", Color(0xFFD81B60), Icons.Default.MusicNote),
       CategoryItem("travel", "Travel", Color(0xFF2E7D32), Icons.Default.Flight),
-      CategoryItem("cooking", "Cooking", Color(0xFF5E35B1), Icons.Default.Restaurant),
-      CategoryItem("gk", "General\nKnowledge", Color(0xFF7CB342), Icons.Default.Lightbulb),
       CategoryItem("gaming", "Gaming", Color(0xFF1976D2), Icons.Default.SportsEsports),
-      CategoryItem("more", "More", Color(0xFFF57C00), Icons.Default.MoreHoriz)
+      CategoryItem("videos", "Videos", Color(0xFF1E88E5), Icons.Default.Movie),
+      CategoryItem("gk", "General\nKnowledge", Color(0xFF7CB342), Icons.Default.Lightbulb),
+      CategoryItem("languages", "Languages", Color(0xFFFF8F00), Icons.Default.Language),
+      CategoryItem("more", "Settings", Color(0xFF455A64), Icons.Default.Settings)
     )
   }
 
@@ -251,30 +267,222 @@ fun HomeScreen(
         age = "2 months ago",
         thumbnailRes = R.drawable.player_hero_shivaji,
         category = "History & Education",
+        language = "ಕನ್ನಡ / मराठी"
+      ),
+      TrendingVideo(
+        id = "v11",
+        title = "Tirupati Balaji Darshanam | శ్రీ వేంకటేశ్వర స్వాಮಿ భక్తి గీతాలు",
+        duration = "11:20",
+        views = "7.2M views",
+        age = "2 months ago",
+        thumbnailRes = R.drawable.thumb_ganesh,
+        category = "Devotional",
+        language = "తెలుగు"
+      ),
+      TrendingVideo(
+        id = "v12",
+        title = "Brihadeeswarar Temple Secrets | தஞ்சை பெரிய கோவில் வரலாறு",
+        duration = "13:45",
+        views = "4.9M views",
+        age = "1 month ago",
+        thumbnailRes = R.drawable.thumb_next_kashi,
+        category = "History & Education",
+        language = "தமிழ்"
+      ),
+      TrendingVideo(
+        id = "v13",
+        title = "God's Own Country Kerala Tour | കേരള സൗന്ദര്യം ಮತ್ತು ಪ್ರವಾಸ",
+        duration = "09:50",
+        views = "3.6M views",
+        age = "3 weeks ago",
+        thumbnailRes = R.drawable.thumb_animals,
+        category = "Travel",
+        language = "മലയാളം"
+      ),
+      TrendingVideo(
+        id = "v14",
+        title = "Raigad Fort Trek & Powada | किल्ले रायगड आणि शिवकालीन इतिहास",
+        duration = "14:10",
+        views = "6.1M views",
+        age = "2 weeks ago",
+        thumbnailRes = R.drawable.player_hero_shivaji,
+        category = "History & Education",
+        language = "मराठी"
+      ),
+      TrendingVideo(
+        id = "v15",
+        title = "Rabindra Sangeet & Shantiniketan | আনন্দলোকে মঙ্গলালোকে",
+        duration = "08:15",
+        views = "2.4M views",
+        age = "1 week ago",
+        thumbnailRes = R.drawable.thumb_next_learning,
+        category = "Music",
+        language = "বাংলা"
+      ),
+      TrendingVideo(
+        id = "v16",
+        title = "Golden Temple Amritsar | ਸ਼੍ਰੀ ਹਰਿਮੰਦਰ ਸਾਹਿਬ ਦਰਸ਼ਨ",
+        duration = "10:30",
+        views = "5.3M views",
+        age = "5 days ago",
+        thumbnailRes = R.drawable.thumb_next_chamundeshwari,
+        category = "Devotional",
+        language = "ਪੰਜਾਬੀ"
+      ),
+      TrendingVideo(
+        id = "v17",
+        title = "Mahishasura Mardini Stotram | संस्कृत स्तोत्र धारा",
+        duration = "16:00",
+        views = "8.9M views",
+        age = "3 days ago",
+        thumbnailRes = R.drawable.thumb_next_krishna,
+        category = "Devotional",
+        language = "संस्कृतम्"
+      ),
+      TrendingVideo(
+        id = "v18",
+        title = "Karnataka 24x7 News Live | ಬೆಂಗಳೂರು & ರಾಜ್ಯದ ಬ್ರೇಕಿಂಗ್ ನ್ಯೂಸ್",
+        duration = "LIVE",
+        views = "68K watching",
+        age = "Streaming Now",
+        thumbnailRes = R.drawable.thumb_next_kashi,
+        category = "News Live",
         language = "ಕನ್ನಡ"
+      ),
+      TrendingVideo(
+        id = "v19",
+        title = "India 24x7 National & Headline News Live | आज की ताजा खबरें लाइव",
+        duration = "LIVE",
+        views = "92K watching",
+        age = "Streaming Now",
+        thumbnailRes = R.drawable.player_hero_shivaji,
+        category = "News Live",
+        language = "हिन्दी / English"
+      ),
+      TrendingVideo(
+        id = "v20",
+        title = "Kannada & Youth Superhit Music Jukebox | ಟಾಪ್ ಯೂತ್ ಟ್ಯೂಬ್ ಹಾಡುಗಳು",
+        duration = "22:40",
+        views = "5.4M views",
+        age = "2 days ago",
+        thumbnailRes = R.drawable.thumb_ganesh,
+        category = "Music",
+        language = "ಕನ್ನಡ / हिन्दी"
+      ),
+      TrendingVideo(
+        id = "v21",
+        title = "Namma Bengaluru Stand-Up Comedy | ನಗೆ ಹಬ್ಬ ಕಾಮಿಡಿ ಸ್ಪೆಷಲ್",
+        duration = "14:25",
+        views = "3.9M views",
+        age = "4 days ago",
+        thumbnailRes = R.drawable.hero_banner_kids,
+        category = "Comedy",
+        language = "ಕನ್ನಡ"
+      ),
+      TrendingVideo(
+        id = "v22",
+        title = "Great Indian Family Comedy Nights | देसी कॉमेडी और मस्ती शो",
+        duration = "18:10",
+        views = "4.7M views",
+        age = "1 week ago",
+        thumbnailRes = R.drawable.thumb_animals,
+        category = "Comedy",
+        language = "हिन्दी / English"
+      ),
+      TrendingVideo(
+        id = "v23",
+        title = "Karnataka Kitchen Special: Ragi Mudde & Nati Style Sambar | ಹಳ್ಳಿ ಅಡುಗೆ ಮನೆ",
+        duration = "09:45",
+        views = "2.6M views",
+        age = "5 days ago",
+        thumbnailRes = R.drawable.thumb_next_dosa,
+        category = "Kitchen",
+        language = "ಕನ್ನಡ"
+      ),
+      TrendingVideo(
+        id = "v24",
+        title = "10-Min Royal Paneer Masala Kitchen Recipe | झटपट किचन रेसिपी",
+        duration = "11:05",
+        views = "3.1M views",
+        age = "1 week ago",
+        thumbnailRes = R.drawable.thumb_next_dosa,
+        category = "Kitchen",
+        language = "हिन्दी / English"
+      ),
+      TrendingVideo(
+        id = "v25",
+        title = "Startup India & Small Business Guide 2026 | ಸ್ವಂತ ಉದ್ಯಮ ಮತ್ತು ವ್ಯಾಪಾರ",
+        duration = "15:50",
+        views = "2.8M views",
+        age = "3 days ago",
+        thumbnailRes = R.drawable.thumb_next_learning,
+        category = "Business",
+        language = "ಕನ್ನಡ / English"
+      ),
+      TrendingVideo(
+        id = "v26",
+        title = "Stock Market, MSME & Digital Business Masterclass | व्यापार और निवेश",
+        duration = "19:20",
+        views = "4.2M views",
+        age = "6 days ago",
+        thumbnailRes = R.drawable.thumb_shivaji,
+        category = "Business",
+        language = "हिन्दी / ગુજરાતી"
       )
     )
   }
 
-  val trendingVideos = remember { allVideos.take(3) }
+  val trendingVideos = remember { listOf(allVideos[17], allVideos[0], allVideos[19], allVideos[20], allVideos[24]) }
 
   val filterCategories = remember {
     listOf(
       "All · ಎಲ್ಲಾ",
+      "News Live · ನ್ಯೂಸ್ ಲೈವ್",
+      "Music · ಸಂಗೀತ",
+      "Comedy · ಹಾಸ್ಯ",
+      "Kitchen · ಅಡುಗೆ ಮನೆ",
+      "Business · ವ್ಯಾಪಾರ",
       "Kids Zone · ಮಕ್ಕಳು",
       "Devotional · ಭಕ್ತಿ",
       "History & Education · ಶಿಕ್ಷಣ",
-      "Cooking · ಅಡುಗೆ",
       "Travel · ಪ್ರವಾಸ"
     )
   }
 
-  val displayedVideos = remember(selectedFilterCategory, allVideos) {
-    if (selectedFilterCategory.startsWith("All")) {
+  val displayedVideos = remember(selectedFilterCategory, selectedLanguage, filterByLanguageStrictly, allVideos) {
+    val matchesLang: (TrendingVideo) -> Boolean = { video ->
+      selectedLanguage == "All India" || selectedLanguage == "All" || selectedLanguage.isBlank() ||
+        video.language.contains(selectedLanguage, ignoreCase = true) ||
+        (selectedLanguage == "Kannada" && video.language.contains("ಕನ್ನಡ")) ||
+        (selectedLanguage == "Hindi" && video.language.contains("हिन्दी")) ||
+        (selectedLanguage == "Telugu" && video.language.contains("తెలుగు")) ||
+        (selectedLanguage == "Tamil" && video.language.contains("தமிழ்")) ||
+        (selectedLanguage == "Malayalam" && video.language.contains("മലയാളം")) ||
+        (selectedLanguage == "Marathi" && video.language.contains("मराठी")) ||
+        (selectedLanguage == "Bengali" && video.language.contains("বাংলা")) ||
+        (selectedLanguage == "Punjabi" && video.language.contains("ਪੰਜਾਬੀ")) ||
+        (selectedLanguage == "Sanskrit" && video.language.contains("संस्कृतम्")) ||
+        (selectedLanguage == "Gujarati" && video.language.contains("ગુજરાતી"))
+    }
+
+    val categoryFiltered = if (selectedFilterCategory.startsWith("All")) {
       allVideos
     } else {
       val key = selectedFilterCategory.substringBefore(" ·").trim()
-      allVideos.filter { it.category.contains(key, ignoreCase = true) }
+      allVideos.filter { video ->
+        when {
+          key.equals("Kitchen", ignoreCase = true) ->
+            video.category.equals("Kitchen", ignoreCase = true) || video.category.equals("Cooking", ignoreCase = true)
+          else -> video.category.contains(key, ignoreCase = true)
+        }
+      }
+    }
+
+    if (filterByLanguageStrictly && selectedLanguage != "All India" && selectedLanguage != "All") {
+      val strictMatches = categoryFiltered.filter(matchesLang)
+      if (strictMatches.isNotEmpty()) strictMatches else categoryFiltered
+    } else {
+      categoryFiltered.sortedByDescending { if (matchesLang(it)) 1 else 0 }
     }
   }
 
@@ -284,11 +492,12 @@ fun HomeScreen(
       .background(Color(0xFFF8F9FA))
       .testTag("home_screen_root")
   ) {
-    // 1. Red Header matching uploaded mockup
+    // 1. Red Header matching uploaded mockup with India Languages Yard
     YouthTubeRedHeader(
       selectedLanguage = selectedLanguage,
       onLanguageSelect = {
         selectedLanguage = it
+        filterByLanguageStrictly = true
         Toast.makeText(context, "Language set to $it", Toast.LENGTH_SHORT).show()
       },
       onMenuClick = onOpenDrawer,
@@ -296,7 +505,9 @@ fun HomeScreen(
       onNotificationClick = {
         Toast.makeText(context, "2 new notifications from Youth Tube!", Toast.LENGTH_SHORT).show()
       },
-      onProfileClick = { showLoginDialog = true }
+      onProfileClick = { showLoginDialog = true },
+      onOpenLanguageYard = { showIndiaLanguagesYard = true },
+      onSettingsClick = onOpenSettings
     )
 
     // 2. Main Scrollable Content
@@ -312,6 +523,23 @@ fun HomeScreen(
         HeroCarouselSection()
       }
 
+      // India All Languages Yard Banner Section (14 Official Indian Languages)
+      item {
+        IndiaLanguagesYardHomeBanner(
+          selectedLanguage = selectedLanguage,
+          onLanguageSelect = { lang ->
+            selectedLanguage = lang.nativeName
+            filterByLanguageStrictly = true
+            Toast.makeText(
+              context,
+              "${lang.greeting} Welcome to Youth Tube in ${lang.nativeName} (${lang.englishName})!",
+              Toast.LENGTH_SHORT
+            ).show()
+          },
+          onOpenYard = { showIndiaLanguagesYard = true }
+        )
+      }
+
       // Top Google AdMob Live Banner Ad
       item {
         AdMobBannerView(
@@ -321,7 +549,7 @@ fun HomeScreen(
         )
       }
 
-      // 12 Category Grid (4 columns x 3 rows)
+      // 16 Category Grid (4 columns x 4 rows): News Live, Music, Comedy, Kitchen, Business, All & more
       item {
         CategoryGridSection(
           categories = categories,
@@ -329,15 +557,23 @@ fun HomeScreen(
           onCategoryClick = { cat ->
             selectedCategory = cat.id
             when (cat.id) {
-              "videos" -> selectedFilterCategory = "All · ಎಲ್ಲಾ"
+              "all", "videos" -> {
+                selectedFilterCategory = "All · ಎಲ್ಲಾ"
+                filterByLanguageStrictly = false
+              }
+              "news_live" -> selectedFilterCategory = "News Live · ನ್ಯೂಸ್ ಲೈವ್"
+              "music" -> selectedFilterCategory = "Music · ಸಂಗೀತ"
+              "comedy" -> selectedFilterCategory = "Comedy · ಹಾಸ್ಯ"
+              "kitchen" -> selectedFilterCategory = "Kitchen · ಅಡುಗೆ ಮನೆ"
+              "business" -> selectedFilterCategory = "Business · ವ್ಯಾಪಾರ"
               "kids" -> selectedFilterCategory = "Kids Zone · ಮಕ್ಕಳು"
               "devotional" -> selectedFilterCategory = "Devotional · ಭಕ್ತಿ"
               "education" -> selectedFilterCategory = "History & Education · ಶಿಕ್ಷಣ"
-              "cooking" -> selectedFilterCategory = "Cooking · ಅಡುಗೆ"
               "travel" -> selectedFilterCategory = "Travel · ಪ್ರವಾಸ"
               "shorts" -> onNavigateToLiveVideo()
-              "more" -> onOpenAdmin()
-              else -> Toast.makeText(context, "Browsing ${cat.title} on Youth Tube", Toast.LENGTH_SHORT).show()
+              "languages" -> showIndiaLanguagesYard = true
+              "more" -> onOpenSettings()
+              else -> Toast.makeText(context, "Browsing ${cat.title.replace("\n", " ")} on Youth Tube", Toast.LENGTH_SHORT).show()
             }
           }
         )
@@ -351,7 +587,9 @@ fun HomeScreen(
             onPlayVideo(video)
           },
           onSeeAllClick = {
+            selectedCategory = "all"
             selectedFilterCategory = "All · ಎಲ್ಲಾ"
+            filterByLanguageStrictly = false
             Toast.makeText(context, "Showing All Videos below!", Toast.LENGTH_SHORT).show()
           }
         )
@@ -383,7 +621,13 @@ fun HomeScreen(
                 ),
                 shadowElevation = if (isSelected) 3.dp else 1.dp,
                 modifier = Modifier
-                  .clickable { selectedFilterCategory = catLabel }
+                  .clickable {
+                    selectedFilterCategory = catLabel
+                    if (catLabel.startsWith("All")) {
+                      selectedCategory = "all"
+                      filterByLanguageStrictly = false
+                    }
+                  }
                   .testTag("filter_chip_$catLabel")
               ) {
                 Text(
@@ -548,10 +792,32 @@ fun HomeScreen(
       onDismiss = { showLoginDialog = false }
     )
   }
+
+  // India All Languages Yard Modal (14 Official Indian Languages)
+  if (showIndiaLanguagesYard) {
+    IndiaLanguagesYardModal(
+      currentSelectedLanguage = selectedLanguage,
+      onLanguageSelected = { lang ->
+        selectedLanguage = lang.nativeName
+        filterByLanguageStrictly = true
+        Toast.makeText(
+          context,
+          "${lang.greeting} Welcome to Youth Tube in ${lang.nativeName} (${lang.englishName})!",
+          Toast.LENGTH_LONG
+        ).show()
+      },
+      onSelectAllIndia = {
+        selectedLanguage = "All India"
+        filterByLanguageStrictly = false
+        Toast.makeText(context, "🇮🇳 Showing Videos from All 14 Indian Languages!", Toast.LENGTH_SHORT).show()
+      },
+      onDismiss = { showIndiaLanguagesYard = false }
+    )
+  }
 }
 
 // -------------------------------------------------------------
-// RED APP HEADER WITH LANGUAGE PILL
+// RED APP HEADER WITH LANGUAGE PILL & INDIA YARD
 // -------------------------------------------------------------
 
 @Composable
@@ -561,7 +827,9 @@ fun YouthTubeRedHeader(
   onMenuClick: () -> Unit,
   onSearchClick: () -> Unit,
   onNotificationClick: () -> Unit,
-  onProfileClick: () -> Unit = {}
+  onProfileClick: () -> Unit = {},
+  onOpenLanguageYard: () -> Unit = {},
+  onSettingsClick: () -> Unit = {}
 ) {
   Column(
     modifier = Modifier
@@ -642,12 +910,27 @@ fun YouthTubeRedHeader(
             modifier = Modifier.size(20.dp)
           )
         }
+
+        Spacer(modifier = Modifier.width(4.dp))
+
+        // Settings Icon Button
+        IconButton(
+          onClick = onSettingsClick,
+          modifier = Modifier.size(38.dp).testTag("btn_header_settings")
+        ) {
+          Icon(
+            imageVector = Icons.Default.Settings,
+            contentDescription = "Settings",
+            tint = Color.White,
+            modifier = Modifier.size(22.dp)
+          )
+        }
       }
     }
 
     Spacer(modifier = Modifier.height(10.dp))
 
-    // Language Selector Capsule matching mockup: ಕನ್ನಡ | English | हिन्दी
+    // Language Selector Capsule matching mockup: ಕನ್ನಡ | English | हिन्दी | 🇮🇳 Yard (14)
     Box(
       modifier = Modifier.fillMaxWidth(),
       contentAlignment = Alignment.Center
@@ -693,6 +976,195 @@ fun YouthTubeRedHeader(
             isSelected = selectedLanguage == "हिन्दी",
             onClick = { onLanguageSelect("हिन्दी") }
           )
+
+          // If another Indian language is currently selected, display it in the capsule
+          if (selectedLanguage !in listOf("ಕನ್ನಡ", "English", "हिन्दी", "All India")) {
+            Text(
+              text = "|",
+              color = Color.LightGray,
+              modifier = Modifier.padding(horizontal = 4.dp),
+              fontWeight = FontWeight.Bold
+            )
+            LanguagePillItem(
+              text = selectedLanguage,
+              isSelected = true,
+              onClick = { onLanguageSelect(selectedLanguage) }
+            )
+          }
+
+          Text(
+            text = "|",
+            color = Color.LightGray,
+            modifier = Modifier.padding(horizontal = 4.dp),
+            fontWeight = FontWeight.Bold
+          )
+
+          // Special Yard Pill
+          Surface(
+            color = if (selectedLanguage == "All India") Color(0xFF138808) else Color(0xFFFF6D00),
+            shape = RoundedCornerShape(18.dp),
+            modifier = Modifier
+              .clickable { onOpenLanguageYard() }
+              .testTag("btn_capsule_yard")
+          ) {
+            Row(
+              verticalAlignment = Alignment.CenterVertically,
+              modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+            ) {
+              Text(
+                text = "🇮🇳 Yard (14) ➔",
+                color = Color.White,
+                fontWeight = FontWeight.Black,
+                fontSize = 11.sp
+              )
+            }
+          }
+        }
+      }
+    }
+
+    Spacer(modifier = Modifier.height(8.dp))
+
+    // Clickable India All Languages Subtitle Bar
+    Row(
+      modifier = Modifier
+        .fillMaxWidth()
+        .clickable { onOpenLanguageYard() }
+        .testTag("header_india_yard_bar"),
+      horizontalArrangement = Arrangement.Center,
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Surface(
+        color = Color.White.copy(alpha = 0.18f),
+        shape = RoundedCornerShape(14.dp)
+      ) {
+        Row(
+          modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+          verticalAlignment = Alignment.CenterVertically
+        ) {
+          Text(text = "🇮🇳", fontSize = 12.sp)
+          Spacer(modifier = Modifier.width(6.dp))
+          Text(
+            text = "India All Languages Yard · ಭಾರತದ ಎಲ್ಲಾ ಭಾಷೆಗಳ ತಾಣ (14 ಭಾಷೆಗಳು) ➔",
+            color = Color.White,
+            fontWeight = FontWeight.Bold,
+            fontSize = 11.sp
+          )
+        }
+      }
+    }
+  }
+}
+
+/**
+ * In-feed Banner for India All Languages Yard with horizontal scroll of all 14 official Indian languages.
+ */
+@Composable
+fun IndiaLanguagesYardHomeBanner(
+  selectedLanguage: String,
+  onLanguageSelect: (IndianLanguage) -> Unit,
+  onOpenYard: () -> Unit
+) {
+  val languages = remember { IndianLanguagesRepository.allLanguages }
+
+  Surface(
+    shape = RoundedCornerShape(16.dp),
+    color = Color.White,
+    border = BorderStroke(1.dp, Color(0xFFFFD180)),
+    shadowElevation = 2.dp,
+    modifier = Modifier
+      .fillMaxWidth()
+      .padding(horizontal = 14.dp)
+      .testTag("india_languages_yard_banner")
+  ) {
+    Column(
+      modifier = Modifier.padding(12.dp)
+    ) {
+      // Header Row
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          Text(text = "🇮🇳", fontSize = 20.sp)
+          Spacer(modifier = Modifier.width(8.dp))
+          Column {
+            Text(
+              text = "India All Languages Yard",
+              fontWeight = FontWeight.Black,
+              fontSize = 14.sp,
+              color = Color(0xFF1E2430)
+            )
+            Text(
+              text = "ಭಾರತದ ಎಲ್ಲಾ ಭಾಷೆಗಳ ತಾಣ · 14 Official Languages",
+              fontSize = 11.sp,
+              color = Color(0xFFD32F2F),
+              fontWeight = FontWeight.Bold
+            )
+          }
+        }
+
+        Surface(
+          color = Color(0xFFFFF0F1),
+          shape = RoundedCornerShape(12.dp),
+          modifier = Modifier
+            .clickable { onOpenYard() }
+            .testTag("btn_view_all_14_languages")
+        ) {
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+          ) {
+            Text(
+              text = "All 14 ➔",
+              color = Color(0xFFE50914),
+              fontSize = 11.sp,
+              fontWeight = FontWeight.Bold
+            )
+          }
+        }
+      }
+
+      Spacer(modifier = Modifier.height(10.dp))
+
+      // Horizontal Scroll of all 14 Languages
+      LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(horizontal = 2.dp)
+      ) {
+        items(languages) { lang ->
+          val isSelected = selectedLanguage == lang.nativeName || selectedLanguage == lang.englishName
+          Surface(
+            shape = RoundedCornerShape(20.dp),
+            color = if (isSelected) lang.accentColor else Color(0xFFF8FAFC),
+            border = BorderStroke(
+              width = if (isSelected) 1.5.dp else 1.dp,
+              color = if (isSelected) lang.accentColor else Color(0xFFCBD5E1)
+            ),
+            modifier = Modifier
+              .clickable { onLanguageSelect(lang) }
+              .testTag("yard_chip_${lang.code}")
+          ) {
+            Row(
+              verticalAlignment = Alignment.CenterVertically,
+              modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+            ) {
+              Text(
+                text = lang.nativeName,
+                color = if (isSelected) Color.White else Color(0xFF1E293B),
+                fontWeight = FontWeight.Bold,
+                fontSize = 12.sp
+              )
+              Spacer(modifier = Modifier.width(4.dp))
+              Text(
+                text = "· ${lang.region.take(6)}",
+                color = if (isSelected) Color.White.copy(alpha = 0.85f) else Color(0xFF64748B),
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Medium
+              )
+            }
+          }
         }
       }
     }
@@ -1334,16 +1806,16 @@ fun AllVideoFeedCard(
             )
         )
 
-        // Top Left 4K UHD Badge
+        // Top Left LIVE or 4K UHD Badge
         Surface(
-          color = Color(0xFFE50914),
+          color = if (video.duration == "LIVE") Color(0xFFD50000) else Color(0xFFE50914),
           shape = RoundedCornerShape(4.dp),
           modifier = Modifier
             .align(Alignment.TopStart)
             .padding(10.dp)
         ) {
           Text(
-            text = "4K UHD",
+            text = if (video.duration == "LIVE") "● LIVE NEWS" else "4K UHD",
             color = Color.White,
             fontWeight = FontWeight.Black,
             fontSize = 10.sp,
@@ -1353,14 +1825,14 @@ fun AllVideoFeedCard(
 
         // Bottom Right Duration Badge
         Surface(
-          color = Color.Black.copy(alpha = 0.85f),
+          color = if (video.duration == "LIVE") Color(0xFFD50000) else Color.Black.copy(alpha = 0.85f),
           shape = RoundedCornerShape(4.dp),
           modifier = Modifier
             .align(Alignment.BottomEnd)
             .padding(10.dp)
         ) {
           Text(
-            text = video.duration,
+            text = if (video.duration == "LIVE") "LIVE 24x7" else video.duration,
             color = Color.White,
             fontWeight = FontWeight.Bold,
             fontSize = 11.sp,

@@ -56,6 +56,32 @@ class LiveVideoViewModel : ViewModel() {
   // Live Stream Channels with Kannada, English, and Hindi matching the Youth Tube logo
   val channels = listOf(
     LiveStreamChannel(
+      id = "karnataka_news_live_24x7",
+      title = "ಕರ್ನಾಟಕ 24x7 ನ್ಯೂಸ್ ಲೈವ್ (Karnataka Breaking News Live)",
+      creator = "Youth Tube News 24x7",
+      category = "News Live",
+      viewerCount = 68420,
+      resolution = "1080p60",
+      bitrateKbps = 6800,
+      fps = 60,
+      streamUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+      description = "ಬೆಂಗಳೂರು, ಕರ್ನಾಟಕ ಮತ್ತು ರಾಷ್ಟ್ರೀಯ ತಾಜಾ ಸುದ್ದಿಗಳ ನೇರ ಪ್ರಸಾರ (24x7 Breaking News Live).",
+      language = "ಕನ್ನಡ"
+    ),
+    LiveStreamChannel(
+      id = "india_national_news_live",
+      title = "India 24x7 National & Business News Live (आज की ताजा खबरें)",
+      creator = "Bharat Live Desk",
+      category = "News Live",
+      viewerCount = 84910,
+      resolution = "4K HDR",
+      bitrateKbps = 8200,
+      fps = 60,
+      streamUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+      description = "Non-stop Indian headline bulletins, Sensex/Nifty business market updates & weather live.",
+      language = "हिन्दी"
+    ),
+    LiveStreamChannel(
       id = "kannada_creator_hub",
       title = "ಬೆಂಗಳೂರು ಯುವ ಕ್ರಿಯೇಟರ್ ಲೈವ್ (Bengaluru Youth Creator Hub)",
       creator = "ಕನ್ನಡ Youth Hub",
@@ -67,6 +93,19 @@ class LiveVideoViewModel : ViewModel() {
       streamUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
       description = "ಯುವ ಟ್ಯೂಬ್ ಲೈವ್ ಸ್ಟ್ರೀಮಿಂಗ್: ಯುವಕರ ಕ್ರಿಯೇಟಿವ್ ಪ್ರಾಜೆಕ್ಟ್ ಮತ್ತು ವ್ಲಾಗ್ಸ್.",
       language = "ಕನ್ನಡ"
+    ),
+    LiveStreamChannel(
+      id = "india_music_jukebox_live",
+      title = "Youth Tube 24/7 Music & Comedy Live Stage",
+      creator = "ಸಂಗೀತ ಮತ್ತು ಹಾಸ್ಯ Live",
+      category = "Music & Comedy",
+      viewerCount = 47250,
+      resolution = "4K HDR",
+      bitrateKbps = 8600,
+      fps = 60,
+      streamUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
+      description = "Live acoustic music jam, pan-India hits & weekend stand-up comedy specials.",
+      language = "English"
     ),
     LiveStreamChannel(
       id = "hindi_spotlight_live",
@@ -109,15 +148,15 @@ class LiveVideoViewModel : ViewModel() {
     ),
     LiveStreamChannel(
       id = "android_dev_summit",
-      title = "Global Tech & Video Creator Summit 2026",
-      creator = "Youth Tube Studio",
-      category = "Technology",
+      title = "Startup India & Business Founders Live Summit 2026",
+      creator = "Youth Tube Business",
+      category = "Business",
       viewerCount = 42190,
       resolution = "4K HDR",
       bitrateKbps = 9200,
       fps = 60,
       streamUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-      description = "Live keynote and technical architecture deep dive into modern Android & CameraX.",
+      description = "Live entrepreneurship pitch, fintech insights & small business growth masterclass.",
       language = "English"
     )
   )

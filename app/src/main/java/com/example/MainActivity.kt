@@ -33,15 +33,22 @@ import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Policy
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Subscriptions
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.outlined.FlashOn
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+import com.example.ui.screens.IndiaLanguagesYardModal
+import com.example.ui.screens.SettingsScreen
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Subscriptions
@@ -88,6 +95,7 @@ import com.example.ui.screens.AdminDashboardScreen
 import com.example.ui.screens.DesignStudioScreen
 import com.example.ui.screens.HomeScreen
 import com.example.ui.screens.LiveVideoScreen
+import com.example.ui.screens.PrivacyPolicyScreen
 import com.example.ui.screens.SnippetsScreen
 import com.example.ui.screens.TasksScreen
 import com.example.ui.screens.TelemetryScreen
@@ -123,12 +131,16 @@ fun YouthTubeApp(viewModel: DevPulseViewModel) {
   var showInfoDialog by remember { mutableStateOf(false) }
   var inAdminDashboard by remember { mutableStateOf(false) }
   var inVideoPlayer by remember { mutableStateOf(false) }
+  var inPrivacyPolicy by remember { mutableStateOf(false) }
+  var inSettings by remember { mutableStateOf(false) }
 
   val videoPlayerViewModel: VideoPlayerViewModel = viewModel()
   val authViewModel: AuthViewModel = viewModel()
   val currentUser by authViewModel.currentUser.collectAsState()
+  val context = LocalContext.current
   var showLoginDialog by remember { mutableStateOf(false) }
   var loginDialogTab by remember { mutableStateOf(0) }
+  var showIndiaLanguagesYard by remember { mutableStateOf(false) }
 
   val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
   val coroutineScope = rememberCoroutineScope()
@@ -145,6 +157,36 @@ fun YouthTubeApp(viewModel: DevPulseViewModel) {
   if (inAdminDashboard) {
     BackHandler { inAdminDashboard = false }
     AdminDashboardScreen(onExitAdmin = { inAdminDashboard = false })
+    return
+  }
+
+  if (inPrivacyPolicy) {
+    BackHandler { inPrivacyPolicy = false }
+    PrivacyPolicyScreen(onBackClick = { inPrivacyPolicy = false })
+    return
+  }
+
+  if (inSettings) {
+    BackHandler { inSettings = false }
+    SettingsScreen(
+      currentUser = currentUser,
+      currentLanguage = "ಕನ್ನಡ",
+      onBackClick = { inSettings = false },
+      onOpenPrivacyPolicy = { inPrivacyPolicy = true },
+      onOpenLanguageYard = { showIndiaLanguagesYard = true },
+      onOpenAdmin = {
+        if (currentUser?.isAdmin == true) {
+          inAdminDashboard = true
+        } else {
+          loginDialogTab = 1
+          showLoginDialog = true
+        }
+      },
+      onOpenLogin = {
+        loginDialogTab = 0
+        showLoginDialog = true
+      }
+    )
     return
   }
 
@@ -348,6 +390,90 @@ fun YouthTubeApp(viewModel: DevPulseViewModel) {
             coroutineScope.launch { drawerState.close() }
           },
           icon = { Icon(Icons.Default.Checklist, contentDescription = null) }
+        )
+
+        NavigationDrawerItem(
+          label = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+              Text("Privacy Policy · ಗೌಪ್ಯತಾ ನೀತಿ", fontWeight = FontWeight.Bold)
+              Spacer(modifier = Modifier.weight(1f))
+              Surface(color = Color(0xFF00C853), shape = RoundedCornerShape(4.dp)) {
+                Text(
+                  "PLAY READY",
+                  color = Color.White,
+                  fontSize = 8.sp,
+                  fontWeight = FontWeight.Bold,
+                  modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                )
+              }
+            }
+          },
+          selected = false,
+          onClick = {
+            inPrivacyPolicy = true
+            coroutineScope.launch { drawerState.close() }
+          },
+          icon = { Icon(Icons.Default.Policy, contentDescription = "Privacy Policy", tint = Color(0xFF00C853)) },
+          colors = NavigationDrawerItemDefaults.colors(
+            unselectedContainerColor = Color(0xFFF0FDF4),
+            unselectedTextColor = Color(0xFF166534)
+          )
+        )
+
+        NavigationDrawerItem(
+          label = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+              Text("India All Languages Yard", fontWeight = FontWeight.Bold)
+              Spacer(modifier = Modifier.weight(1f))
+              Surface(color = Color(0xFFFF6D00), shape = RoundedCornerShape(4.dp)) {
+                Text(
+                  "14 ಭಾಷೆಗಳು",
+                  color = Color.White,
+                  fontSize = 8.sp,
+                  fontWeight = FontWeight.Bold,
+                  modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                )
+              }
+            }
+          },
+          selected = false,
+          onClick = {
+            showIndiaLanguagesYard = true
+            coroutineScope.launch { drawerState.close() }
+          },
+          icon = { Icon(Icons.Default.Language, contentDescription = "India Languages Yard", tint = Color(0xFFFF6D00)) },
+          colors = NavigationDrawerItemDefaults.colors(
+            unselectedContainerColor = Color(0xFFFFF7ED),
+            unselectedTextColor = Color(0xFFC2410C)
+          )
+        )
+
+        NavigationDrawerItem(
+          label = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+              Text("Settings · ಸಂಯೋಜನೆಗಳು", fontWeight = FontWeight.Bold)
+              Spacer(modifier = Modifier.weight(1f))
+              Surface(color = Color(0xFFE50914), shape = RoundedCornerShape(4.dp)) {
+                Text(
+                  "PREFERENCES",
+                  color = Color.White,
+                  fontSize = 8.sp,
+                  fontWeight = FontWeight.Bold,
+                  modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                )
+              }
+            }
+          },
+          selected = false,
+          onClick = {
+            inSettings = true
+            coroutineScope.launch { drawerState.close() }
+          },
+          icon = { Icon(Icons.Default.Settings, contentDescription = "Settings", tint = Color(0xFFE50914)) },
+          colors = NavigationDrawerItemDefaults.colors(
+            unselectedContainerColor = Color(0xFFFFEBEE),
+            unselectedTextColor = Color(0xFFE50914)
+          )
         )
 
         NavigationDrawerItem(
@@ -593,7 +719,8 @@ fun YouthTubeApp(viewModel: DevPulseViewModel) {
                 hashtags = listOf("#YouthTube", "#India", "#${video.category.replace(" ", "").replace("&", "")}")
               )
               inVideoPlayer = true
-            }
+            },
+            onOpenSettings = { inSettings = true }
           )
           1 -> LiveVideoScreen(devPulseViewModel = viewModel) // Shorts mode
           2 -> LiveVideoScreen(devPulseViewModel = viewModel) // Camera studio / Upload
@@ -613,7 +740,10 @@ fun YouthTubeApp(viewModel: DevPulseViewModel) {
             onOpenLogin = {
               loginDialogTab = 0
               showLoginDialog = true
-            }
+            },
+            onOpenPrivacy = { inPrivacyPolicy = true },
+            onOpenLanguageYard = { showIndiaLanguagesYard = true },
+            onOpenSettings = { inSettings = true }
           )
         }
       }
@@ -629,6 +759,24 @@ fun YouthTubeApp(viewModel: DevPulseViewModel) {
               inAdminDashboard = true
             }
           }
+        )
+      }
+
+      // India All Languages Yard Dialog (from Drawer / Profile)
+      if (showIndiaLanguagesYard) {
+        IndiaLanguagesYardModal(
+          currentSelectedLanguage = "ಕನ್ನಡ",
+          onLanguageSelected = { lang ->
+            Toast.makeText(
+              context,
+              "${lang.greeting} Welcome to Youth Tube in ${lang.nativeName} (${lang.englishName})!",
+              Toast.LENGTH_LONG
+            ).show()
+          },
+          onSelectAllIndia = {
+            Toast.makeText(context, "🇮🇳 Showing Videos from All 14 Indian Languages!", Toast.LENGTH_SHORT).show()
+          },
+          onDismiss = { showIndiaLanguagesYard = false }
         )
       }
 
@@ -735,7 +883,10 @@ fun ProfileToolsHub(
   currentUser: com.example.viewmodel.UserProfile? = null,
   onOpenAdmin: () -> Unit = {},
   onOpenVideoPlayer: () -> Unit = {},
-  onOpenLogin: () -> Unit = {}
+  onOpenLogin: () -> Unit = {},
+  onOpenPrivacy: () -> Unit = {},
+  onOpenLanguageYard: () -> Unit = {},
+  onOpenSettings: () -> Unit = {}
 ) {
   var activeSubTab by remember { mutableStateOf(0) }
 
@@ -837,6 +988,87 @@ fun ProfileToolsHub(
         }
         Surface(color = Color(0xFFE50914), shape = RoundedCornerShape(6.dp)) {
           Text("Open", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 11.sp, modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp))
+        }
+      }
+    }
+
+    // Google Play Privacy Policy & Data Safety Card
+    Surface(
+      color = Color(0xFF0F172A),
+      shape = RoundedCornerShape(12.dp),
+      border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF334155)),
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 12.dp, vertical = 4.dp)
+        .clickable { onOpenPrivacy() }
+        .testTag("btn_profile_privacy_policy")
+    ) {
+      Row(
+        modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        Icon(Icons.Default.Policy, contentDescription = null, tint = Color(0xFF00E676), modifier = Modifier.size(24.dp))
+        Spacer(modifier = Modifier.width(10.dp))
+        Column(modifier = Modifier.weight(1f)) {
+          Text("Privacy Policy · ಗೌಪ್ಯತಾ ನೀತಿ", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+          Text("Camera, Mic & Google Play Console Disclosures", color = Color(0xFF94A3B8), fontSize = 11.sp)
+        }
+        Surface(color = Color(0xFF00C853), shape = RoundedCornerShape(6.dp)) {
+          Text("Read", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 11.sp, modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp))
+        }
+      }
+    }
+
+    // India All Languages Yard Quick Launch Card
+    Surface(
+      color = Color(0xFF1E1B18),
+      shape = RoundedCornerShape(12.dp),
+      border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFF6D00).copy(alpha = 0.5f)),
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 12.dp, vertical = 4.dp)
+        .clickable { onOpenLanguageYard() }
+        .testTag("btn_profile_language_yard")
+    ) {
+      Row(
+        modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        Icon(Icons.Default.Language, contentDescription = null, tint = Color(0xFFFF6D00), modifier = Modifier.size(24.dp))
+        Spacer(modifier = Modifier.width(10.dp))
+        Column(modifier = Modifier.weight(1f)) {
+          Text("India All Languages Yard · 14 ಭಾಷೆಗಳು", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+          Text("ಕನ್ನಡ, हिन्दी, English, తెలుగు, தமிழ் & 14 Official Languages", color = Color(0xFFFED7AA), fontSize = 11.sp)
+        }
+        Surface(color = Color(0xFFFF6D00), shape = RoundedCornerShape(6.dp)) {
+          Text("Explore ➔", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 11.sp, modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp))
+        }
+      }
+    }
+
+    // Settings & Preferences Quick Launch Card
+    Surface(
+      color = Color(0xFF1E2430),
+      shape = RoundedCornerShape(12.dp),
+      border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE50914).copy(alpha = 0.5f)),
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 12.dp, vertical = 4.dp)
+        .clickable { onOpenSettings() }
+        .testTag("btn_profile_settings")
+    ) {
+      Row(
+        modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        Icon(Icons.Default.Settings, contentDescription = null, tint = Color(0xFFE50914), modifier = Modifier.size(24.dp))
+        Spacer(modifier = Modifier.width(10.dp))
+        Column(modifier = Modifier.weight(1f)) {
+          Text("Settings · ಸಂಯೋಜನೆಗಳು", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+          Text("Video Quality, Autoplay, Downloads & Notifications", color = Color(0xFFCBD5E1), fontSize = 11.sp)
+        }
+        Surface(color = Color(0xFFE50914), shape = RoundedCornerShape(6.dp)) {
+          Text("Configure", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 11.sp, modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp))
         }
       }
     }
